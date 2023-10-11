@@ -1,0 +1,34 @@
+import numpy as np
+from qiskit import QuantumCircuit, transpile, assemble, Aer, execute
+from qiskit.aqua.components.feature_maps import RawFeatureVector
+from qiskit.ml.datasets import ad_hoc_data
+from qiskit.aqua.utils import split_dataset_to_data_and_labels, map_label_to_class_name
+from qiskit.circuit.library import ZZFeatureMap
+from qiskit.aqua import QuantumInstance
+from qiskit.aqua.algorithms import VQC
+from qiskit.aqua.utils import get_feature_dimension
+
+# Create a quantum feature map
+feature_map = ZZFeatureMap(feature_dimension=2, reps=2)
+
+# Create a quantum instance
+quantum_instance = QuantumInstance(backend=Aer.get_backend('statevector_simulator'))
+
+# Sample data (you can replace this with your dataset)
+sample_data, sample_labels, _ = ad_hoc_data(training_size=20, test_size=10, n=2, gap=0.3, plot_data=False)
+
+# Split data into training and test sets
+training_input, test_input, training_labels, test_labels = split_dataset_to_data_and_labels(sample_data, sample_labels, 2)
+
+# Define and run the VQC (Variational Quantum Classifier)
+vqc = VQC(quantum_instance=quantum_instance,
+          feature_map=feature_map,
+          var_form=None,
+          training_input=training_input,
+          test_input=test_input,
+          datapoints=None)
+
+result = vqc.run(quantum_instance)
+
+# Print the results
+print(f'Testing success ratio: {result["testing_accuracy"]}')
