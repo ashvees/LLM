@@ -1,0 +1,35 @@
+import numpy as np
+from qiskit import QuantumCircuit, transpile, assemble, Aer, execute
+from qiskit.visualization import plot_bloch_multivector
+
+# Quantum circuit setup
+n_qubits = 4  # Representing the fourth dimension
+circuit = QuantumCircuit(n_qubits, n_qubits)
+
+# Apply a quantum gate that simulates frequency measurement (this is a simplified example)
+frequency = 1.234567  # The frequency you want to measure
+
+for qubit in range(n_qubits):
+    circuit.h(qubit)  # Apply Hadamard gate to create superposition
+    circuit.rz(2 * np.pi * frequency, qubit)  # Apply a phase shift representing the frequency
+    circuit.h(qubit)  # Apply Hadamard gate again
+
+# Measurement
+circuit.measure(range(n_qubits), range(n_qubits))
+
+# Simulator
+simulator = Aer.get_backend('qasm_simulator')
+
+# Execute the circuit on the simulator
+job = execute(circuit, simulator, shots=1024)
+
+# Get the results
+result = job.result()
+
+# Get the counts of each measurement outcome
+counts = result.get_counts(circuit)
+
+print(counts)
+
+# Visualization of the results
+plot_bloch_multivector(result.get_statevector(circuit))
